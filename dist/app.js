@@ -135,7 +135,7 @@ $('follow').onclick=()=>{state.follow=!state.follow;state.autofit=true;$('follow
 
 let hintTimer,wheelZoom=false;
 renderer.domElement.addEventListener('wheel',e=>{if(!wheelZoom&&!e.ctrlKey&&!e.metaKey){e.stopImmediatePropagation();$('zoom-hint').hidden=false;clearTimeout(hintTimer);hintTimer=setTimeout(()=>$('zoom-hint').hidden=true,1800);}}, {capture:true,passive:true});
-const touch=matchMedia('(pointer:coarse)').matches;
+const touch=matchMedia('(pointer:coarse)').matches;if(touch)$('model-note').textContent='One finger to rotate · Two fingers to move and zoom';
 function activateViewer(active){if(!touch)return;controls.enabled=active;renderer.domElement.style.touchAction=active?'none':'pan-y';$('touch-activate').hidden=active;$('touch-exit').hidden=!active;}
 activateViewer(false);$('touch-activate').onclick=()=>activateViewer(true);$('touch-exit').onclick=()=>activateViewer(false);
 document.addEventListener('pointerdown',e=>{wheelZoom=host.contains(e.target);$('zoom-hint').hidden=true;if(!host.contains(e.target)&&!$('touch-activate').contains(e.target))activateViewer(false);});
