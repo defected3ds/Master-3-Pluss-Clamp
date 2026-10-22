@@ -133,10 +133,10 @@ $('hotspots').onclick=()=>{state.hotspots=!state.hotspots;$('hotspots').setAttri
 $('projection').onclick=()=>{state.iso=!state.iso;const position=camera.position.clone();camera=state.iso?isoCamera:perspectiveCamera;camera.position.copy(position);controls.object=camera;controls.minZoom=.3;controls.maxZoom=6;state.autofit=true;resetCamera();$('projection').setAttribute('aria-pressed',state.iso);$('projection').querySelector('span').textContent=`${state.iso?'Isometric':'Perspective'}`;};
 $('follow').onclick=()=>{state.follow=!state.follow;state.autofit=true;$('follow').setAttribute('aria-pressed',state.follow);};
 
-let hintTimer;
-renderer.domElement.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey){e.stopImmediatePropagation();$('zoom-hint').hidden=false;clearTimeout(hintTimer);hintTimer=setTimeout(()=>$('zoom-hint').hidden=true,1800);}}, {capture:true,passive:true});
+let hintTimer,wheelZoom=false;
+renderer.domElement.addEventListener('wheel',e=>{if(!wheelZoom&&!e.ctrlKey&&!e.metaKey){e.stopImmediatePropagation();$('zoom-hint').hidden=false;clearTimeout(hintTimer);hintTimer=setTimeout(()=>$('zoom-hint').hidden=true,1800);}}, {capture:true,passive:true});
 const touch=matchMedia('(pointer:coarse)').matches;
 function activateViewer(active){if(!touch)return;controls.enabled=active;renderer.domElement.style.touchAction=active?'none':'pan-y';$('touch-activate').hidden=active;$('touch-exit').hidden=!active;}
 activateViewer(false);$('touch-activate').onclick=()=>activateViewer(true);$('touch-exit').onclick=()=>activateViewer(false);
-document.addEventListener('pointerdown',e=>{if(!host.contains(e.target)&&!$('touch-activate').contains(e.target))activateViewer(false);});
+document.addEventListener('pointerdown',e=>{wheelZoom=host.contains(e.target);$('zoom-hint').hidden=true;if(!host.contains(e.target)&&!$('touch-activate').contains(e.target))activateViewer(false);});
 let prev=performance.now();function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-prev)/1000,.05);prev=now;if(state.playing){state.target=state.amount=Math.min(1,state.amount+dt*state.speed/(state.mode==='install'?(state.config==='double'?55:40):10));if(state.amount>=1)state.playing=false;}else state.amount=THREE.MathUtils.damp(state.amount,state.target,6,dt);if(Math.abs(state.target-state.amount)<.0005)state.amount=state.target;updatePositions();updateTimeline();if(state.autofit)fitCamera(false,dt);controls.update();installationLabels.update(state,parts,hardware,camera,webgl&&allLoaded);renderer.render(scene,camera);}updateText();requestAnimationFrame(loop);
